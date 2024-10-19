@@ -1,7 +1,7 @@
 # IEEE-Mesh
 
 ### Motivation
-There exist some obvious shortcomings in every stage of a student's lifecycle. As a new student, it is hard to find the right people to talk and information you are looking for. As a upperclassmen, it is difficult to keep track of the involvements of your peers. As a graduate, many move onto industry and never look back to help current students. MESH is a start-to-finish solution that will solve the above problems and facilitate connections between students and alumni.
+There exist some obvious shortcomings in every stage of a student's undergraduate journey. As a new student, it is hard to find the right people to talk and information you are looking for. As a upperclassmen, it is difficult to keep track of the involvements of your peers. As a graduate, many move onto industry and never look back to help current students. MESH is a start-to-finish solution that will solve the above problems and facilitate connections between students and alumni.
 
 ### Solution
 Create a database that has profiles on new students, upperclassmen, recent graduates, and company recruiters. Centralizing this data will allow new students to express their goals and weaknesses, upperclassmen to share their experiences at internships, in research, and as teaching assistants, recent graduates to stay connected to the IEEE student branch and expand the scope of companies IEEE is connected with, and company recruiters to have easy access to qualified and interested candidates. 

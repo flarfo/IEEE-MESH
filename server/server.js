@@ -27,7 +27,8 @@ app.use(express.json());
 app.use('/', express.static(path.join(__dirname, '/public')));
 
 app.use('/', require('./routes/root'));
-app.use('/members', require('./routes/memberRoutes'));
+app.use('/', require('./routes/authRoutes'));
+app.use('/', require('./routes/memberRoutes'));
 
 // If reached, requested resource not found (or not implemented) - send Error 404
 app.all('*', (req, res) => {
@@ -52,5 +53,5 @@ mongoose.connection.once('open', () => {
 
 mongoose.connection.on('error', (err) => {
     console.log(err);
-    logEvents(`${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`, mongoErrorLog.log);
+    logEvents(`${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`, 'mongoErrorLog.log');
 });

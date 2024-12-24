@@ -1,11 +1,21 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        dark: '#222831',
+        medium: '#31363F',
+        light: '#76ABAE',
+        white: '#EEEEEE'
+      },
+      fontFamily: {
+        sans: ['Fira Sans', 'sans-serif']
+      }
+    },
   },
-  plugins: [],
+  plugins: [require('@tailwindcss/line-clamp')],
 }

@@ -17,7 +17,7 @@ const getAllMembers = async (req, res) => {
         return res.status(400).json({ message: 'No members found.' });
     }
 
-    // return found users
+    // return found members
     res.json(members);
 };
 
@@ -25,7 +25,7 @@ const getAllMembers = async (req, res) => {
 // @route POST /members
 // @access Private
 const createNewMember = async (req, res) => {
-    const { name, email, roles, internships, research } = req.body;
+    const { name, email, internships, research } = req.body;
 
     // Confirm that data is valid
     if (!name || !email) {
@@ -41,7 +41,7 @@ const createNewMember = async (req, res) => {
         return res.status(409).json({ message: 'Duplicate email.' });
     }
 
-    const memberObject = { name, email, roles, internships, research };
+    const memberObject = { name, email, internships, research };
 
     // Create and store the new member
     const member = await Member.create(memberObject);
@@ -69,7 +69,7 @@ const updateMember = async (req, res) => {
     const member = Member.findById(id).exec();
 
     if (!member) {
-        return res.status(400).json({ message: 'User not found.' });
+        return res.status(400).json({ message: 'Member not found.' });
     }
 
     const duplicate = await Member.findOne({ email }).lean().exec();
@@ -104,10 +104,10 @@ const deleteMember = async (req, res) => {
     const member = await Member.findById(id).exec();
 
     if (!member) {
-        return res.status(400).json({ message: 'User not found.' });
+        return res.status(400).json({ message: 'Member not found.' });
     }
 
-    const result = await user.deleteOne();
+    const result = await member.deleteOne();
 
     const reply = `Name ${result.name} with ID ${result._id} deleted.`
     res.json(reply);

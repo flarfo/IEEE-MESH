@@ -1,12 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-
+// TODO: update user and member routes
 const userSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: true,
-        unique: true
-    },
     email: {
         type: String,
         required: true,
@@ -16,9 +11,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    roles: [{
+        type: String,
+        default: "Member"
+    }],
     member: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
         ref: 'Member'
     },
     createdAt: {

@@ -1,13 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
+const loginLimiter = require('../middleware/loginLimiter');
 
-// POST /login route for user login
-router.route('/login')
-    .post(authController.loginUser);
+router.route('/auth')
+    .post(loginLimiter, authController.login);
 
-// POST /register route for user registration
-router.route('/register')
-    .post(authController.registerUser);
+router.route('/auth/refresh')
+    .get(authController.refresh);
+
+router.route('/auth/logout')
+    .post(authController.logout);
 
 module.exports = router;

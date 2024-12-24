@@ -2,10 +2,14 @@
 const mongoose = require('mongoose');
 
 const memberSchema  = new mongoose.Schema({
-    roles: [{
+    name: {
         type: String,
-        default: "Member"
-    }],
+        required: true
+    },
+    email: {
+        type: String,
+        required: true
+    },
     internships: [{
         type: String,
         required: false
@@ -13,7 +17,20 @@ const memberSchema  = new mongoose.Schema({
     research: [{
         type: String,
         required: false
-    }]
+    }],
+    picture: {
+        type: String,
+        required: false
+    },
+    bio: {
+        type: String,
+        required: false
+    },
+    /*visibility: {
+        type: String,
+        required: false,
+        default: "visible"
+    }*/
 });
 
 module.exports = mongoose.model('Member', memberSchema);

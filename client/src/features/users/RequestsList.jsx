@@ -1,14 +1,14 @@
-import { useGetUsersQuery } from './usersApiSlice';
+import { useGetRequestsQuery } from './usersApiSlice';
 import User from './User';
 
-const UsersList = () => {
+const RequestsList = () => {
     const {
         data: users,
         isLoading,
         isSuccess,
         isError,
         error
-    } = useGetUsersQuery('usersList', {
+    } = useGetRequestsQuery('requestsList', {
         pollingInterval: 60000, // refresh data every 60 seconds, on focus, on mount 
         refetchOnFocus: true,
         refetchOnMountOrArgChange: true
@@ -33,8 +33,8 @@ const UsersList = () => {
                 <thead>
                     <tr>
                         <th scope='col'>Email</th>
-                        <th scope='col'>Roles</th>
-                        <th scope='col'>Edit</th>
+                        <th scope='col'>Name</th>
+                        <th scope='col'>Approve</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,4 +47,4 @@ const UsersList = () => {
     return content;
 };
 
-export default UsersList;
+export default RequestsList;

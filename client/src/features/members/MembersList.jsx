@@ -8,7 +8,7 @@ const MembersList = () => {
         isSuccess,
         isError,
         error
-    } = useGetMembersQuery(null, {
+    } = useGetMembersQuery('membersList', {
         pollingInterval: 15000, // refresh data every 15 seconds, on focus, on mount 
         refetchOnFocus: true,
         refetchOnMountOrArgChange: true

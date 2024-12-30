@@ -30,13 +30,13 @@ const login = async (req, res) => {
             }
         },
         process.env.ACCESS_TOKEN_SECRET,
-        { expiresIn: '15m' }
+        { expiresIn: '15m' } // DEV: 10s DEPLOY: 15m
     );
 
     const refreshToken = jwt.sign(
         { 'email': foundUser.email },
         process.env.REFRESH_TOKEN_SECRET,
-        { expiresIn: '7d' }
+        { expiresIn: '7d' } // DEV 20s DEPLOY: 7d
     );
 
     // Create secure cookie with refresh token 
@@ -55,7 +55,7 @@ const login = async (req, res) => {
 // @route GET /auth/refresh
 // @access Public - because access token has expired
 const refresh = (req, res) => {
-    const cookies = req.cookies
+    const cookies = req.cookies;
 
     if (!cookies?.jwt) return res.status(401).json({ message: 'Unauthorized' });
 

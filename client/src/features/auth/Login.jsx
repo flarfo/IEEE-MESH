@@ -5,12 +5,15 @@ import { useDispatch } from 'react-redux';
 import { setCredentials } from './authSlice';
 import { useLoginMutation } from './authApiSlice';
 
+import usePersist from '../../hooks/usePersist';
+
 const Login = () => {
     const emailRef = useRef();
     const errRef = useRef();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errMsg, setErrMsg] = useState('');
+    const [persist, setPersist] = usePersist();
 
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -61,6 +64,7 @@ const Login = () => {
     
     const handleEmailInput = (e) => setEmail(e.target.value);
     const handlePasswordInput = (e) => setPassword(e.target.value);
+    const handleTogglePersist = (e) => setPersist(prev => !prev);
 
     const errClass = errMsg ? 'errmsg' : 'offscreen';
 
@@ -98,6 +102,15 @@ const Login = () => {
                         required
                     />
                     <button className='mt-4 w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500'>Sign In</button>
+                    <label htmlFor='persist'>
+                        <input 
+                            type='checkbox'
+                            id='persist'
+                            onChange={handleTogglePersist}
+                            checked={persist}
+                        />
+                        { } Stay Logged In
+                    </label>
                 </form>
             </main>
             <footer className='mt-4 text-center'>

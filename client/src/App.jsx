@@ -12,6 +12,8 @@ import NewUserForm from './features/users/NewUserForm';
 import EditMember from './features/members/EditMember';
 import NewMemberForm from './features/members/NewMemberForm';
 import Prefetch from './features/auth/Prefetch';
+import PersistLogin from './features/auth/PersistLogin';
+import RequestsList from './features/users/RequestsList';
 
 function App() {
   return (
@@ -19,25 +21,29 @@ function App() {
       <Route path='/' element={<Layout />}>
         <Route index element={<LandingPage />} />
         <Route path='login' element={<Login />} />
-
-        <Route element={<Prefetch />}>
-          {/* Protected dash routes */}
-          <Route path='dash' element={<DashLayout />}>
-            <Route index element={<Welcome />} />
-            <Route path='users'>
-              <Route index element={<UsersList />} />
-              <Route path=':id' element={<EditUser />} />
-              <Route path='new' element={<NewUserForm />} />
+        <Route path='register' element={<Register />} />
+        <Route element={<PersistLogin />}>
+          <Route element={<Prefetch />}>
+            {/* Protected routes */}
+            <Route path='database'>
+                <Route path='members'>
+                <Route index element={<MembersList />} />
+                <Route path=':id' element={<EditMember />} />
+                <Route path='new' element={<NewMemberForm />} />
+              </Route>
             </Route>
-            <Route path='members'>
-              <Route index element={<MembersList />} />
-              <Route path=':id' element={<EditMember />} />
-              <Route path='new' element={<NewMemberForm />} />
+            <Route path='dash' element={<DashLayout />}>
+              <Route index element={<Welcome />} />
+              <Route path='users'>
+                <Route index element={<UsersList />} />
+                <Route path=':id' element={<EditUser />} />
+                <Route path='new' element={<NewUserForm />} />
+                <Route path='requests' element={<RequestsList />} />
+              </Route>
             </Route>
+            {/* End dash */}
           </Route>
-          {/* End dash */}
         </Route>
-
       </Route>
     </Routes> 
   );

@@ -7,6 +7,7 @@ const mongoose = require('mongoose');
 
 const { logger, logEvents } = require('./middleware/logger');
 const errorHandler = require('./middleware/errorHandler');
+const cookieParser = require('cookie-parser')
 const corsOptions = require('./config/corsOptions');
 const connectDB = require('./config/dbConnection');
 
@@ -22,6 +23,9 @@ app.use(cors(corsOptions));
 
 // Receieve and parse json data
 app.use(express.json());
+
+// Receive and parse cookies
+app.use(cookieParser());
 
 // Search for static files to use on the server
 app.use('/', express.static(path.join(__dirname, '/public')));

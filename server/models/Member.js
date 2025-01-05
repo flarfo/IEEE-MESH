@@ -26,6 +26,10 @@ const memberSchema  = new mongoose.Schema({
         type: String,
         required: false
     },
+    approved: {
+        type: Boolean,
+        default: false
+    }
     /*visibility: {
         type: String,
         required: false,

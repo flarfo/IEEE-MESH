@@ -1,4 +1,7 @@
 const User = require('../models/User');
+const Token = require('../models/Token');
+const crypto = require('crypto');
+const sendEmail = require('../config/sendEmail');
 
 // TODO: add user linking and member creation
 
@@ -21,9 +24,9 @@ const getAllUsers = async (req, res) => {
 
 // @desc Create new user
 // @route POST /users
-// @access Private
+// @access Public
 const createNewUser = async (req, res) => {
-    const { email, password, roles } = req.body;
+    const { email, password } = req.body;
 
     // Confirm that data is valid
     if (!email || !password) {
@@ -39,7 +42,7 @@ const createNewUser = async (req, res) => {
         return res.status(409).json({ message: 'Duplicate email.' });
     }
 
-    const userObject = { email, password, roles };
+    const userObject = { email, password };
 
     // Create and store the new user
     const user = await User.create(userObject);
@@ -48,8 +51,51 @@ const createNewUser = async (req, res) => {
         res.status(201).json({ message: `New user ${email} created.` });
     }
     else {
-        res.status(400).json({ message: 'Invalid user data received.' });
+        return res.status(400).json({ message: 'Invalid user data received.' });
     }
+
+    const tokenObject = {
+        userId: user._id,
+        token: crypto.randomBytes(32).toString('hex')
+    };
+
+    // Create and store a new token 
+    const token = await Token.create(tokenObject);
+    if (token) {
+        res.status(201);
+    }
+    else {
+        return res.status(400);   
+    }
+    console.log('Sending email...');
+    const url = `${process.env.CLIENT_URL}/users/${user._id}/verify/${token.token}`
+    await sendEmail({
+        email: user.email,
+        subject: 'Verify Email',
+        text: url
+    });
+};
+
+const getUserVerificationById = async (req, res) => {
+    const user = await User.findOne({ _id: req.params.id });
+    if (!user) {
+        return res.status(400).json({ message: 'User not found.' });
+    }
+
+    const token = await Token.findOne({
+        userId: user._id,
+        token: req.params.token
+    });
+
+    if (!token) {
+        return res.status(400).json({ message: 'Verification token not found.' });
+    }
+
+    await user.updateOne({
+        verified: true
+    });
+
+    await token.deleteOne();
 };
 
 // @desc Update a user
@@ -107,6 +153,7 @@ const deleteUser = async (req, res) => {
 module.exports = {
     getAllUsers,
     createNewUser,
+    getUserVerificationById,
     updateUser,
     deleteUser
 };

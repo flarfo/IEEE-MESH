@@ -13,7 +13,9 @@ import EditMember from './features/members/EditMember';
 import NewMemberForm from './features/members/NewMemberForm';
 import Prefetch from './features/auth/Prefetch';
 import PersistLogin from './features/auth/PersistLogin';
-import RequestsList from './features/users/RequestsList';
+import RequireAuth from './features/auth/RequireAuth';
+import VerifyEmail from './features/users/VerifyEmail';
+import { ROLES } from './config/roles';
 
 function App() {
   return (
@@ -22,28 +24,47 @@ function App() {
         <Route index element={<LandingPage />} />
         <Route path='login' element={<Login />} />
         <Route path='register' element={<Register />} />
+
+        {/* DEV - REMOVE*/}
+        <Route path='memberform' element={<NewMemberForm />} />
+
+        <Route path='users'>
+            <Route path=':id'>
+              <Route path='verify'>
+                <Route path=':token' element={<VerifyEmail />} />
+              </Route>
+            </Route>
+        </Route>
+
         <Route element={<PersistLogin />}>
-          <Route element={<Prefetch />}>
-            {/* Protected routes */}
-            <Route path='database'>
-                <Route path='members'>
-                <Route index element={<MembersList />} />
-                <Route path=':id' element={<EditMember />} />
-                <Route path='new' element={<NewMemberForm />} />
+        
+          {/* Protected routes */}
+          <Route element={<RequireAuth allowedRoles={[ROLES.Member, ROLES.Manager, ROLES.Admin]}/>}>
+            <Route element={<Prefetch />}>
+              <Route path='database'>
+                  <Route path='members'>
+                  <Route index element={<MembersList />} />
+                  <Route path=':id' element={<EditMember />} />
+                  <Route path='new' element={<NewMemberForm />} />
+                </Route>
               </Route>
-            </Route>
-            <Route path='dash' element={<DashLayout />}>
-              <Route index element={<Welcome />} />
-              <Route path='users'>
-                <Route index element={<UsersList />} />
-                <Route path=':id' element={<EditUser />} />
-                <Route path='new' element={<NewUserForm />} />
-                <Route path='requests' element={<RequestsList />} />
+              {/* Dash */}
+              <Route path='dash' element={<DashLayout />}>
+                <Route index element={<Welcome />} />
+                <Route element={<RequireAuth allowedRoles={[ROLES.Admin]}/>}>
+                  <Route path='users'>
+                    <Route index element={<UsersList />} />
+                    <Route path=':id' element={<EditUser />} />
+                    <Route path='new' element={<NewUserForm />} />
+                  </Route>
+                </Route>
               </Route>
+              {/* End dash */}
             </Route>
-            {/* End dash */}
           </Route>
         </Route>
+        {/* End protected routes */}
+
       </Route>
     </Routes> 
   );

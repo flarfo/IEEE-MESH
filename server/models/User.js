@@ -13,15 +13,19 @@ const userSchema = new mongoose.Schema({
     },
     roles: [{
         type: String,
-        default: "Member"
+        default: 'Guest'
     }],
     member: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Member'
     },
+    verified: {
+        type: Boolean,
+        default: false
+    },
     createdAt: {
         type: Date,
-        default: Date.now
+        default: Date.now()
     }
 });
 
@@ -30,6 +34,12 @@ userSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();
     
     this.password = await bcrypt.hash(this.password, 10);
+    next();
+});
+
+// Update roles to have 'Guest' as default role
+userSchema.pre('save', async function(next) {
+    this.roles = ['Guest'];
     next();
 });
 

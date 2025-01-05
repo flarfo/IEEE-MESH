@@ -40,6 +40,8 @@ const Login = () => {
             
             setEmail('');
             setPassword('');
+
+            // TODO: reroute to homepage
             navigate('/dash');
         }
         catch (err) {
@@ -74,7 +76,7 @@ const Login = () => {
     const content = (
         <section className='flex flex-col items-center justify-center h-screen bg-gray-100'>
             <header className='text-2xl font-bold mb-6 text-gray-800'>
-                <h1>Employee Login</h1>
+                <h1>Member Login</h1>
             </header>
             <main className='w-full max-w-md p-8 bg-white shadow-md rounded-lg'>
                 <p ref={errRef} className={errClass} aria-live="assertive">{errMsg}</p>

@@ -64,30 +64,6 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 { type: 'User', id: arg.id }
             ]
         }),
-        getRequests: builder.query({
-            query: () => '/users/requests',
-            validateStatus: (response, result) => {
-                return response.status === 200 && !result.isError
-            },
-            transformResponse: responseData => {
-                const loadedRequests = responseData.map(user => {
-                    user.id = user._id
-
-                    return user;
-                });
-
-                return usersAdapter.setAll(initialState, loadedRequests);
-            },
-            providesTags: (result, error, arg) => {
-                if (result?.ids) {
-                    return [
-                        { type: 'User', id: 'LIST' },
-                        ...result.ids.map(id => ({ type: 'User', id }))
-                    ]
-                } 
-                else return [{ type: 'User', id: 'LIST' }]
-            }
-        }),
     }),
 });
 
@@ -96,7 +72,6 @@ export const {
     useAddNewUserMutation,
     useUpdateUserMutation,
     useDeleteUserMutation,
-    useGetRequestsQuery,
 } = usersApiSlice;
 
 // returns the query result object
@@ -112,6 +87,6 @@ const selectUsersData = createSelector(
 export const {
     selectAll: selectAllUsers,
     selectById: selectUserById,
-    selectIds: selectUserIds
+    selectIds: selectUserIds,
     // Pass in a selector that returns the users slice of state
 } = usersAdapter.getSelectors(state => selectUsersData(state) ?? initialState);

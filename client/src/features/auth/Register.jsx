@@ -6,6 +6,7 @@ import { useAddNewUserMutation } from '../users/usersApiSlice';
 const Register = () => {
     const emailRef = useRef();
     const errRef = useRef();
+    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errMsg, setErrMsg] = useState('');
@@ -35,10 +36,12 @@ const Register = () => {
 
             await register({
                 email: email,
+                username: username,
                 password: password
             });
 
             setEmail('');
+            setUsername('');
             setPassword('');
         }
         catch (err) {
@@ -62,6 +65,7 @@ const Register = () => {
     }
     
     const handleEmailInput = (e) => setEmail(e.target.value);
+    const handleUsernameInput = (e) => setUsername(e.target.value);
     const handlePasswordInput = (e) => setPassword(e.target.value);
 
     const errClass = errMsg ? 'errmsg' : 'offscreen';
@@ -77,7 +81,7 @@ const Register = () => {
                 <form className='flex flex-col' onSubmit={handleSubmit}>
                     <label htmlFor="email" className='block font-medium text-gray-700'>Email:</label>
                     <input
-                        className='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                        className='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500'
                         type="text"
                         id="email"
                         ref={emailRef}
@@ -86,9 +90,19 @@ const Register = () => {
                         autoComplete="off"
                         required
                     />
+                    <label htmlFor="username" className='block font-medium text-gray-700'>Username:</label>
+                    <input
+                        className='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500'
+                        type="text"
+                        id="username"
+                        value={username}
+                        onChange={handleUsernameInput}
+                        autoComplete="off"
+                        required
+                    />
                     <label htmlFor="password" className='block font-medium text-gray-700'>Password:</label>
                     <input
-                        className='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                        className='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500'
                         type="password"
                         id="password"
                         value={password}
@@ -96,10 +110,12 @@ const Register = () => {
                         autoComplete="off"
                         required
                     />
-                    <button className='mt-4 w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500'>Sign Up</button>
+                    <button className='mt-4 w-full bg-black text-white font-semibold py-2 px-4 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500'>Sign Up</button>
                 </form>
             </main>
             <footer className='mt-4 text-center'>
+                <Link to="/login">Login</Link>
+                { } | { }
                 <Link to="/">Back to Home</Link>
             </footer>
         </section>

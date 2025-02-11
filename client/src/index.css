@@ -5,7 +5,17 @@
 @tailwind utilities;
 
 body {
-  background-color: #101010;
+  background-color: white;
   background-size: cover;
   background-position: top center;
+}
+
+/* Add these to your CSS if needed */
+.ant-card-body {
+  padding: 24px !important;
+}
+
+.ant-card:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s ease;
 }

@@ -5,24 +5,27 @@ import { jwtDecode } from 'jwt-decode';
 const useAuth = () => {
     const token = useSelector(selectCurrentToken);
 
-    let isManager = false;
+    let isGuest = false;
+    let isMember = false;
     let isAdmin = false;
-    let status = 'Member';
+    let status = '';
     
     if (token) {
         const decoded = jwtDecode(token);
-        const { email, roles } = decoded.UserInfo;
+        const { username, roles } = decoded.UserInfo;
 
-        isManager = roles.includes('Manager');
+        isGuest = roles.includes('Guest');
+        isMember = roles.includes('Member');
         isAdmin = roles.includes('Admin');
 
-        if (isManager) status = isManager;
-        if (isAdmin) status = isAdmin;
+        if (isGuest) status = 'Guest';
+        if (isMember) status = 'Member';
+        if (isAdmin) status = 'Admin';
 
-        return { email, roles, isManager, isAdmin, status }
+        return { username, roles, isAdmin, status }
     }
 
-    return { email: '', roles: [], isManager, isAdmin, status };
+    return { username: '', roles: [], isAdmin, status };
 };
 
 export default useAuth;

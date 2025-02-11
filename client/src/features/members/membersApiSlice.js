@@ -15,7 +15,7 @@ export const membersApiSlice = apiSlice.injectEndpoints({
             },
             transformResponse: responseData => {
                 const loadedMembers = responseData.map(member => {
-                    member.id = member._id
+                    member.id = member._id;
 
                     return member;
                 });
@@ -30,6 +30,17 @@ export const membersApiSlice = apiSlice.injectEndpoints({
                     ]
                 } 
                 else return [{ type: 'Member', id: 'LIST' }]
+            }
+        }),
+        getMemberByUsername: builder.query({
+            query: (username) => `/users/${username}`,
+            validateStatus: (response, result) => {
+                return response.status === 200 && !result.isError
+            },
+            transformResponse: responseData => {
+                responseData.id = responseData._id;
+
+                return responseData;
             }
         }),
         addNewMember: builder.mutation({
@@ -71,6 +82,7 @@ export const membersApiSlice = apiSlice.injectEndpoints({
 
 export const {
     useGetMembersQuery,
+    useGetMemberByUsernameQuery,
     useAddNewMemberMutation,
     useUpdateMemberMutation,
     useDeleteMemberMutation,

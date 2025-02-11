@@ -1,14 +1,12 @@
 import { use, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import ProgressBar from '../../components/ProgressBar';
-import { useUpdateRequestMutation } from '../users/requestsApiSlice';
 
 const NewMemberForm = () => {
     const [curStep, setStep] = useState(1);
     const totalSteps = 3;
 
     const params = useParams();
-    const [register, { isLoading }] = useUpdateRequestMutation();
 
     const [name, setName] = useState('');
 
@@ -28,7 +26,7 @@ const NewMemberForm = () => {
         e.preventDefault();
         
         try {
-            await register({ name }).unwrap();
+            // await register({ name }).unwrap();
         }
         catch (err) { 
 

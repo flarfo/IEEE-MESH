@@ -27,6 +27,7 @@ const EditUserForm = ({ user }) => {
 
     const [email, setEmail] = useState(user.email)
     const [validEmail, setValidEmail] = useState(false)
+    const [username, setUsername] = useState(user.username)
     const [password, setPassword] = useState('')
     const [validPassword, setValidPassword] = useState(false)
     const [roles, setRoles] = useState(user.roles)
@@ -50,8 +51,9 @@ const EditUserForm = ({ user }) => {
 
     }, [isSuccess, isDelSuccess, navigate])
 
-    const onEmailChanged = e => setEmail(e.target.value);
-    const onPasswordChanged = e => setPassword(e.target.value);
+    const onEmailChanged = (e) => setEmail(e.target.value);
+    const onUsernameChanged = (e) => setUsername(e.target.value);
+    const onPasswordChanged = (e) => setPassword(e.target.value);
 
     const onRolesChanged = e => {
         const values = Array.from(
@@ -64,10 +66,10 @@ const EditUserForm = ({ user }) => {
 
     const onSaveUserClicked = async (e) => {
         if (password) {
-            await updateUser({ id: user.id, email, password, roles });
+            await updateUser({ id: user.id, email, username, password, roles });
         } 
         else {
-            await updateUser({ id: user.id, email, roles });
+            await updateUser({ id: user.id, email, username, roles });
         }
     }
 
@@ -137,6 +139,18 @@ const EditUserForm = ({ user }) => {
                     autoComplete='off'
                     value={email}
                     onChange={onEmailChanged}
+                />
+
+                 <label className='form__label' htmlFor='username'>
+                    Username: <span className='nowrap'>[x letters]</span></label>
+                <input
+                    className={`form__input ${validUserClass}`}
+                    id='username'
+                    name='username'
+                    type='text'
+                    autoComplete='off'
+                    value={username}
+                    onChange={onUsernameChanged}
                 />
 
                 <label className='form__label' htmlFor='password'>

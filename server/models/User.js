@@ -7,6 +7,11 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    username: {
+        type: String,
+        required: true,
+        unique: true
+    },
     password: {
         type: String,
         required: true
@@ -34,12 +39,6 @@ userSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();
     
     this.password = await bcrypt.hash(this.password, 10);
-    next();
-});
-
-// Update roles to have 'Guest' as default role
-userSchema.pre('save', async function(next) {
-    this.roles = ['Guest'];
     next();
 });
 

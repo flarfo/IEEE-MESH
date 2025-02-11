@@ -9,8 +9,7 @@ const UsersList = () => {
         isError,
         error
     } = useGetUsersQuery('usersList', {
-        pollingInterval: 60000, // refresh data every 60 seconds, on focus, on mount 
-        refetchOnFocus: true,
+        pollingInterval: 60000, // refresh data every 60 seconds, on mount 
         refetchOnMountOrArgChange: true
     });
 

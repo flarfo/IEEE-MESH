@@ -11,6 +11,9 @@ router.route('/users/:id/verify/:token')
 
 router.use('/users', verifyJWT);
 
+router.route('/users/:username')
+    .get(usersController.getMemberByUsername);
+
 // Routing for Users data HTTP methods
 router.route('/users')
     .get(usersController.getAllUsers)

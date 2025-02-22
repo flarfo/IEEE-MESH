@@ -103,7 +103,7 @@ const createNewUser = async (req, res) => {
     }
 
     // Check for duplicate member information
-    const memberObject = { email, username };
+    const memberObject = { email: email, name: username, username: username };
     const member = await Member.create(memberObject);
 
     if (!member) {

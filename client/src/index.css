@@ -10,12 +10,7 @@ body {
   background-position: top center;
 }
 
-/* Add these to your CSS if needed */
-.ant-card-body {
-  padding: 24px !important;
-}
-
-.ant-card:hover {
+.ant-hovercard:hover {
   transform: translateY(-2px);
   transition: all 0.3s ease;
 }

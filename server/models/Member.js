@@ -4,9 +4,13 @@ const mongoose = require('mongoose');
 const memberSchema  = new mongoose.Schema({
     name: {
         type: String,
-        required: true
+        required: false
     },
     email: {
+        type: String,
+        required: true
+    },
+    username: {
         type: String,
         required: true
     },
@@ -25,6 +29,11 @@ const memberSchema  = new mongoose.Schema({
     bio: {
         type: String,
         required: false
+    },
+    connections: {
+        instagram: { type: String },
+        linkedin: { type: String },
+        personal: { type: String }
     },
     approved: {
         type: Boolean,

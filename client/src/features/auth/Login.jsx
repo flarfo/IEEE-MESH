@@ -8,9 +8,9 @@ import { useLoginMutation } from './authApiSlice';
 import usePersist from '../../hooks/usePersist';
 
 const Login = () => {
-    const emailRef = useRef();
+    const identifierRef = useRef();
     const errRef = useRef();
-    const [email, setEmail] = useState('');
+    const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [errMsg, setErrMsg] = useState('');
     const [persist, setPersist] = usePersist();
@@ -22,27 +22,27 @@ const Login = () => {
 
     // focus email field on load
     useEffect(() => {
-        emailRef.current.focus();
+        identifierRef.current.focus();
     }, []);
 
     // clear error message field on email/password change 
     useEffect(() => {
         setErrMsg('');
-    }, [email, password])
+    }, [identifier, password])
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
             // try login and get access token
-            const { accessToken } = await login({ email, password }).unwrap();
+            const { accessToken } = await login({ identifier, password }).unwrap();
             dispatch(setCredentials({ accessToken })); // save access token
             
-            setEmail('');
+            setIdentifier('');
             setPassword('');
 
             // TODO: reroute to homepage
-            navigate('/dash');
+            navigate('/');
         }
         catch (err) {
             // Display error message
@@ -50,7 +50,7 @@ const Login = () => {
                 setErrMsg('No server response.');
             }
             else if (err.status === 400) {
-                setErrMsg('Missing email or password.');
+                setErrMsg('Missing username/email or password.');
             }
             else if (err.status === 401) {
                 setErrMsg('Unauthorized');
@@ -64,7 +64,7 @@ const Login = () => {
         }
     }
     
-    const handleEmailInput = (e) => setEmail(e.target.value);
+    const handleIdentifierInput = (e) => setIdentifier(e.target.value);
     const handlePasswordInput = (e) => setPassword(e.target.value);
     const handleTogglePersist = (e) => setPersist(prev => !prev);
 
@@ -76,36 +76,36 @@ const Login = () => {
     const content = (
         <section className='flex flex-col items-center justify-center h-screen bg-gray-100'>
             <header className='text-2xl font-bold mb-6 text-gray-800'>
-                <h1>Member Login</h1>
+                <h1>Login</h1>
             </header>
             <main className='w-full max-w-md p-8 bg-white shadow-md rounded-lg'>
                 <p ref={errRef} className={errClass} aria-live="assertive">{errMsg}</p>
 
                 <form className='flex flex-col' onSubmit={handleSubmit}>
-                    <label htmlFor="email" className='block font-medium text-gray-700'>Email:</label>
+                    <label htmlFor="email" className='block font-medium text-gray-700'>Username/Email:</label>
                     <input
-                        className='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                        className='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500'
                         type="text"
                         id="email"
-                        ref={emailRef}
-                        value={email}
-                        onChange={handleEmailInput}
+                        ref={identifierRef}
+                        value={identifier}
+                        onChange={handleIdentifierInput}
                         autoComplete="off"
                         required
                     />
 
                     <label htmlFor="password" className='block mt-2 font-medium text-gray-700'>Password:</label>
                     <input
-                        className='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                        className='w-full px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500'
                         type="password"
                         id="password"
                         onChange={handlePasswordInput}
                         value={password}
                         required
                     />
-                    <button className='mt-4 w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500'>Sign In</button>
+                    <button className='mt-4 w-full bg-black text-white font-semibold py-2 px-4 rounded hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500'>Sign In</button>
                     <label htmlFor='persist'>
-                        <input 
+                        <input className='accent-black'
                             type='checkbox'
                             id='persist'
                             onChange={handleTogglePersist}

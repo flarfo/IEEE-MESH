@@ -1,5 +1,9 @@
+import React from 'react';
 import { useGetUsersQuery } from './usersApiSlice';
 import User from './User';
+import { Typography, Spin, Alert, Space } from 'antd';
+
+const { Title } = Typography;
 
 const UsersList = () => {
     const {
@@ -9,7 +13,7 @@ const UsersList = () => {
         isError,
         error
     } = useGetUsersQuery('usersList', {
-        pollingInterval: 60000, // refresh data every 60 seconds, on focus, on mount 
+        pollingInterval: 60000,
         refetchOnFocus: true,
         refetchOnMountOrArgChange: true
     });
@@ -17,30 +21,47 @@ const UsersList = () => {
     let content;
 
     if (isLoading) {
-        content = <p>Loading...</p>
+        content = (
+            <div style={{ textAlign: 'center', padding: '50px' }}>
+                <Spin size="large" />
+            </div>
+        );
     }
 
     if (isError) {
-        content = <p>{error?.data?.message}</p>
+        content = (
+            <Alert
+                message="Error"
+                description={error?.data?.message || 'Failed to load users'}
+                type="error"
+                showIcon
+            />
+        );
     }
-    
+
     if (isSuccess) {
         const { ids } = users;
-        const tableContent = ids?.length ? ids.map(userId => <User key={userId} userId={userId} />) : null;
 
         content = (
-            <table>
-                <thead>
-                    <tr>
-                        <th scope='col'>Email</th>
-                        <th scope='col'>Roles</th>
-                        <th scope='col'>Edit</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {tableContent}
-                </tbody>
-            </table>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '24px' }}>
+                <Title level={2} style={{ marginBottom: '24px' }}>
+                    Users List
+                </Title>
+                <Space
+                    direction="vertical"
+                    size="middle"
+                    style={{ display: 'flex' }}
+                >
+                    {ids?.length
+                        ? ids.map(userId => <User key={userId} userId={userId} />)
+                        : <Alert
+                            message="No users found"
+                            type="info"
+                            showIcon
+                          />
+                    }
+                </Space>
+            </div>
         );
     }
 

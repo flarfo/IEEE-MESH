@@ -1,66 +1,102 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPenSquare, faPenToSquare } from '@fortawesome/free-solid-svg-icons';
-import { useNavigate } from 'react-router-dom';
-
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Card, Tag, Typography, Avatar, Space, Tooltip } from 'antd';
+import { UserOutlined, ProjectOutlined } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { selectMemberById } from './membersApiSlice';
 
+const { Text, Paragraph, Title } = Typography;
+
 const Member = ({ memberId }) => {
     const member = useSelector(state => selectMemberById(state, memberId));
-    const navigate = useNavigate();
 
-    if (member) {
-        const memberInternshipString = member.internships.toString().replaceAll(',', ', ');
-        const memberResearchString = member.research.toString().replaceAll(',', ', ');
-        const memberPicture = member.picture;
+    if (!member) return null;
 
-        // TODO: onclick should take to an expanded profile view, with contact information, etc...
-        // make bio, research, etc cutoff rather than flex
-        // make research/work topics sortable on click
-        return (
-            <div className='max-w-4xl mb-8 mx-auto p-6 bg-white shadow-lg rounded-lg flex'>
-                {/* Profile Picture */}
-                <div className='w-1/4 flex-shrink-0'>
-                    <img
-                    src='https://via.placeholder.com/150' // Replace with actual profile picture
-                    alt='Profile'
-                    className='w-full h-auto rounded-full object-cover'
-                    />
-                </div>
+    // Color map for research tags - you can customize these colors
+    const colorMap = [
+        'magenta', 'red', 'volcano', 'orange', 'gold',
+        'lime', 'green', 'cyan', 'blue', 'geekblue', 'purple'
+    ];
 
-                {/* Profile Details */}
-                <div className='w-3/4 pl-6 flex flex-col'>
-                    {/* Name */}
-                    <h2 className='text-2xl font-semibold text-gray-800 mb-2'>{member.name}</h2>
+    return (
+        <div>
+            <Link to={'/profile/' + member.username}>
+                <Card
+                    hoverable
+                    className="w-full"
+                    bodyStyle={{ padding: 24 }}
+                >
+                    <div className="flex flex-col md:flex-row gap-6">
+                        {/* Left Section - Avatar */}
+                        <div className="flex-shrink-0 flex justify-center">
+                            <Avatar
+                                size={120}
+                                src={member.picture || null}
+                                icon={!member.picture && <UserOutlined />}
+                            />
+                        </div>
 
-                    {/* Research Row */}
-                    <div className='flex items-start space-x-4 mb-4'>{
-                        member.research.map(research => (
-                                <div className='bg-gray-100 p-3 rounded-lg text-center w-fit'>
-                                    <p className='text-sm font-medium text-gray-600'>Research</p>
-                                    <p className='text-sm font-bold text-gray-800'>{research}</p>
+                        {/* Right Section - Content */}
+                        <div className="flex-grow">
+                            {/* Name and Basic Info */}
+                            <div className="mb-4">
+                                <Title level={4} className="mb-1">
+                                    {member.name}
+                                </Title>
+                                {member.title && (
+                                    <Text type="secondary">
+                                        {member.title}
+                                    </Text>
+                                )}
+                            </div>
+
+                            {/* Research Areas */}
+                            <div className="mb-4">
+                                <Space size={[0, 8]} wrap>
+                                    {member.research.map((research, index) => (
+                                        <Tooltip key={research} title="Research Area">
+                                            <Tag
+                                                color={colorMap[index % colorMap.length]}
+                                                icon={<ProjectOutlined />}
+                                            >
+                                                {research}
+                                            </Tag>
+                                        </Tooltip>
+                                    ))}
+                                </Space>
+                            </div>
+
+                            {/* Bio */}
+                            <Paragraph
+                                ellipsis={{
+                                    rows: 3,
+                                    expandable: true,
+                                    symbol: 'more'
+                                }}
+                                className="text-gray-600"
+                            >
+                                {member.bio}
+                            </Paragraph>
+
+                            {/* Internships/Experience - Only show if exists */}
+                            {member.internships && member.internships.length > 0 && (
+                                <div className="mt-2">
+                                    <Text strong className="text-sm">Experience: </Text>
+                                    <Space size={[0, 4]} wrap>
+                                        {member.internships.map((internship, index) => (
+                                            <Tag key={index} color="default">
+                                                {internship}
+                                            </Tag>
+                                        ))}
+                                    </Space>
                                 </div>
-                        ))}
+                            )}
+                        </div>
                     </div>
-
-                    {/* Bio */}
-                    <p className='text-gray-700 text-sm leading-relaxed line-clamp-3'>
-                    {member.bio}
-                    </p>
-                </div>
-            </div>
-
-            /*<tr>
-                <td>{member.name}</td>
-                <td>{member.email}</td>
-                <td>{memberResearchString || 'Empty'}</td>
-                <td>{memberInternshipString || 'Empty'}</td>
-            </tr>*/
-        );
-    }
-    else {
-        return null;
-    }
+                </Card>
+            </Link>
+        </div>
+    );
 };
 
 export default Member;

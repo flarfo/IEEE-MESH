@@ -6,26 +6,35 @@ const jwt = require('jsonwebtoken');
 // @route POST /auth
 // @access Public
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ message: 'All fields are required' });
+    if (!identifier || !password) {
+        return res.status(400).json({ message: 'Username/email and password are required' });
     }
 
-    const foundUser = await User.findOne({ email }).exec();
+    const isEmail = identifier.includes('@');
 
+    let foundUser;
+    if (isEmail) {
+        foundUser = await User.findOne({ email: identifier });
+    }
+    else {
+        foundUser = await User.findOne({ username: identifier });
+    }
+    
     if (!foundUser) {
-        return res.status(401).json({ message: 'Unauthorized' });
+
+        return res.status(400).json({ message: 'User not found.' });
     }
 
     const match = await bcrypt.compare(password, foundUser.password);
 
-    if (!match) return res.status(401).json({ message: 'Unauthorized' });
+    if (!match) return res.status(400).json({ message: 'Incorrect username or password.' });
 
     const accessToken = jwt.sign(
         {
             'UserInfo': {
-                'email': foundUser.email,
+                'username': foundUser.username,
                 'roles': foundUser.roles
             }
         },
@@ -34,7 +43,7 @@ const login = async (req, res) => {
     );
 
     const refreshToken = jwt.sign(
-        { 'email': foundUser.email },
+        { 'username': foundUser.username },
         process.env.REFRESH_TOKEN_SECRET,
         { expiresIn: '7d' } // DEV 20s DEPLOY: 7d
     );
@@ -47,7 +56,7 @@ const login = async (req, res) => {
         maxAge: 7 * 24 * 60 * 60 * 1000 // cookie expiry: set to match refreshToken
     });
 
-    // Send accessToken containing email and roles 
+    // Send accessToken containing username and roles 
     res.json({ accessToken });
 }
 
@@ -67,13 +76,13 @@ const refresh = (req, res) => {
         async (err, decoded) => {
             if (err) return res.status(403).json({ message: 'Forbidden' });
 
-            const foundUser = await User.findOne({ email: decoded.email }).exec();
+            const foundUser = await User.findOne({ username: decoded.username }).exec();
 
             if (!foundUser) return res.status(401).json({ message: 'Unauthorized' });
 
             const accessToken = jwt.sign({
                 'UserInfo': {
-                    'email': foundUser.email,
+                    'username': foundUser.username,
                     'roles': foundUser.roles
                 }
             },
@@ -91,6 +100,7 @@ const refresh = (req, res) => {
 const logout = (req, res) => {
     const cookies = req.cookies
     if (!cookies?.jwt) return res.sendStatus(204) // No content
+    console.log('Cookie cleared');
     res.clearCookie('jwt', { httpOnly: true, sameSite: 'None', secure: true })
     res.json({ message: 'Cookie cleared' })
 }

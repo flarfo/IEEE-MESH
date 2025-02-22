@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Member = require('../models/Member');
 const Token = require('../models/Token');
 const crypto = require('crypto');
 const sendEmail = require('../config/sendEmail');
@@ -11,7 +12,7 @@ const sendEmail = require('../config/sendEmail');
 const getAllUsers = async (req, res) => {
     // select() to choose which elements to take, for example select('-password') will exclude the password
     // lean() to get data as JSON without extra method information
-    const users = await User.find().lean();
+    const users = await User.find().select('-password').lean();
     
     if (!users?.length) {
         // if no members exist, return JSON with bad request message
@@ -22,37 +23,96 @@ const getAllUsers = async (req, res) => {
     res.json(users);
 };
 
+// @desc Get user by username
+// @route GET /users/:username
+// @access Private
+const getMemberByUsername = async (req, res) => {
+    const username = req.params.username;
+
+    if (!username) {
+        return res.status(400).json({ message: 'Username required.' });
+    }
+
+    const user = await User.findOne({ 'username': username }).select('-password');
+    
+    if (!user) {
+        // if no members exist, return JSON with bad request message
+        return res.status(400).json({ message: `User ${username} not found.` });
+    }
+
+    if (user.username === req.username || req.roles.includes('Admin')) {
+        if (user.member) {
+            const member = await Member.findOne({ '_id': user.member });
+
+            if (!member) {
+                const memberObject = { email: user.email, username: user.username };
+                const newMember = await Member.create(memberObject);
+                user.member = newMember._id;
+                await user.save();
+
+                return res.json(newMember);
+            }
+
+            // return found member
+            return res.json(member);
+        }
+    }
+
+    return res.status(401).json({ message: 'Unauthorized.' });
+};
+
 // @desc Create new user
 // @route POST /users
 // @access Public
 const createNewUser = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, username, password, roles } = req.body;
 
     // Confirm that data is valid
-    if (!email || !password) {
+    if (!email || !username || !password) {
         // if missing required information, return JSON with bad request message
-        return res.status(400).json({ message: 'Email and password fields are required.' });
+        return res.status(400).json({ message: 'Email, username, and password fields are required.' });
     }
 
-    // Check for duplicate information
-    const duplicate = await User.findOne({ email }).lean().exec();
+    // Check for duplicate user information
+    // TODO: might need to modify this $or query
+    const duplicateUser = await User.findOne({$or: [{ username }, { email }]}).lean().exec();
 
-    if (duplicate) {
+    if (duplicateUser) {
         // if duplicate, return JSON with conflict message
-        return res.status(409).json({ message: 'Duplicate email.' });
+        return res.status(409).json({ message: 'Duplicate email or username.' });
     }
 
-    const userObject = { email, password };
-
+    // TODO: create member on user creation
+    let userObject;
+    if (req.roles?.includes('Admin')) {
+        // TODO: i don't think this works
+        userObject = { email, username, password, roles };
+    }
+    else {
+        userObject = { email, username, password, roles: [ 'Guest' ] };
+    }
+    
     // Create and store the new user
     const user = await User.create(userObject);
 
     if (user) {
-        res.status(201).json({ message: `New user ${email} created.` });
+        res.status(201).json({ message: `New user ${username} created.` });
     }
     else {
         return res.status(400).json({ message: 'Invalid user data received.' });
     }
+
+    // Check for duplicate member information
+    const memberObject = { email: email, name: username, username: username };
+    const member = await Member.create(memberObject);
+
+    if (!member) {
+        return res.status(400).json({ message: 'Failed to create member object.' });
+    }
+
+    // Create new member and link to User
+    user.member = member._id;
+    await user.save();
 
     const tokenObject = {
         userId: user._id,
@@ -76,6 +136,9 @@ const createNewUser = async (req, res) => {
     });
 };
 
+// @desc Verify account email
+// @route GET /users/:id/verify/:token
+// @access Public
 const getUserVerificationById = async (req, res) => {
     const user = await User.findOne({ _id: req.params.id });
     if (!user) {
@@ -86,6 +149,8 @@ const getUserVerificationById = async (req, res) => {
         userId: user._id,
         token: req.params.token
     });
+
+    // TODO: if member exists with given email already, link user to member
 
     if (!token) {
         return res.status(400).json({ message: 'Verification token not found.' });
@@ -102,30 +167,42 @@ const getUserVerificationById = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = async (req, res) => {
-    const {id, email, password, roles} = req.body;
+    const {id, email, username, password, roles} = req.body;
+
+    // All fields (except password and roles) are required
+    if (!id || !email || !username) {
+        return res.status(400).json({ message: 'All fields except password and roles are required' })
+    }
 
     // Confirm that data is valid
-    const user = User.findById(id).exec();
+    const user = await User.findById(id);
 
     if (!user) {
         return res.status(400).json({ message: 'User not found.' });
     }
+    // Ensure requesting user is authorized to update
+    if (user.username === req.username || req.roles.includes('Admin')) {
+        user.email = email;
+        user.username = username;
 
-    const duplicate = await User.findOne({ email }).lean().exec();
+        if (password) {
+            user.password = password;
+        }
+        
+        // Only administrators should be able to update user roles
+        if (req.roles.includes('Admin')) {
+            if (roles) {
+                user.roles = roles;
+                console.log('roles updated', user.roles);
+            }
+        }
 
-    // Verify that received id equals original id (the existing user we are searching for, not an actual duplicate) 
-    if (duplicate && duplicate?._id.toString() !== id) {
-        // if duplicate, return JSON with conflict message
-        return res.status(409).json({ message: 'Duplicate email.' });
+        const updatedUser = await user.save();
+
+        return res.json({ message: `${updatedUser.username} updated.` });
     }
-
-    user.email = email;
-    user.password = password
-    user.roles = roles;
     
-    const updatedUser = await user.save();
-
-    res.json({ message: `${updatedUser.email} updated.` });
+    return res.status(401).json({ message: 'Unauthorized.' });
 };
 
 // @desc Delete a user
@@ -154,6 +231,7 @@ module.exports = {
     getAllUsers,
     createNewUser,
     getUserVerificationById,
+    getMemberByUsername,
     updateUser,
     deleteUser
 };

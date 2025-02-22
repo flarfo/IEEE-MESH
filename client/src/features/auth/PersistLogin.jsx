@@ -6,7 +6,7 @@ import usePersist from '../../hooks/usePersist';
 import { useSelector } from 'react-redux';
 import { selectCurrentToken } from './authSlice';
 
-const PersistLogin = () => {
+const PersistLogin = ({ strict = true }) => {
 
     const [persist] = usePersist();
     const token = useSelector(selectCurrentToken);
@@ -42,8 +42,6 @@ const PersistLogin = () => {
         }
 
         return () => effectRan.current = true;
-
-        // eslint-disable-next-line
     }, []);
 
     let content;
@@ -55,12 +53,17 @@ const PersistLogin = () => {
         content = <p>Loading...</p>;
     }
     else if (isError) {
-        content = (
-            <p>
-                {`${error.data?.message} - `}
-                <Link to='/login'>Please login again</Link>.
-            </p>
-        );
+        if (error.status === 401 && !strict) {
+            content = <Outlet />;
+        }
+        else {
+            content = (
+                <p>
+                    {`${error.data?.message} - `}
+                    <Link to='/login'>Please login again</Link>.
+                </p>
+            );
+        }   
     }
     else if (isSuccess && trueSuccess) {
         console.log('Persist success.');

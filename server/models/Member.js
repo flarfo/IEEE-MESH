@@ -10,6 +10,10 @@ const memberSchema  = new mongoose.Schema({
         type: String,
         required: true
     },
+    username: {
+        type: String,
+        required: true
+    },
     internships: [{
         type: String,
         required: false
@@ -25,6 +29,11 @@ const memberSchema  = new mongoose.Schema({
     bio: {
         type: String,
         required: false
+    },
+    connections: {
+        instagram: { type: String },
+        linkedin: { type: String },
+        personal: { type: String }
     },
     approved: {
         type: Boolean,

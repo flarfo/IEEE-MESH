@@ -40,7 +40,6 @@ const MembersList = () => {
     }, [members]);
 
     // Filter members based on search and research areas
-    // Filter members based on search and research areas
     const filteredMembers = useMemo(() => {
         if (!members?.ids) return [];
         return members.ids.filter(id => {

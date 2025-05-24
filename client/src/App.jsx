@@ -9,7 +9,6 @@ import UsersList from './features/users/UsersList';
 import MembersList from './features/members/MembersList';
 import EditUser from './features/users/EditUser';
 import NewUserForm from './features/users/NewUserForm';
-import NewMemberForm from './features/members/NewMemberForm';
 import Prefetch from './features/auth/Prefetch';
 import PersistLogin from './features/auth/PersistLogin';
 import RequireAuth from './features/auth/RequireAuth';
@@ -45,7 +44,6 @@ function App() {
                 <Route path="database">
                   <Route path="members">
                   <Route index element={<MembersList />} />
-                    <Route path="new" element={<NewMemberForm />} />
                   </Route>
                 </Route>
               </Route>

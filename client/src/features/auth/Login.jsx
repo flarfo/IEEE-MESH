@@ -75,6 +75,13 @@ const Login = () => {
 
     const content = (
         <section className='flex flex-col items-center justify-center h-screen bg-gray-100'>
+            <button onClick={() => {
+                fetch('http://localhost:3500/debug-test-email');
+            }}>
+                DEBUG: Email
+                <input type='text' id='debug-input'>
+                </input>
+            </button>
             <header className='text-2xl font-bold mb-6 text-gray-800'>
                 <h1>Login</h1>
             </header>

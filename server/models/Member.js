@@ -34,16 +34,7 @@ const memberSchema  = new mongoose.Schema({
         instagram: { type: String },
         linkedin: { type: String },
         personal: { type: String }
-    },
-    approved: {
-        type: Boolean,
-        default: false
     }
-    /*visibility: {
-        type: String,
-        required: false,
-        default: "visible"
-    }*/
 });
 
 module.exports = mongoose.model('Member', memberSchema);

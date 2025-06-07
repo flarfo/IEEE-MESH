@@ -43,18 +43,6 @@ export const membersApiSlice = apiSlice.injectEndpoints({
                 return responseData;
             }
         }),
-        addNewMember: builder.mutation({
-            query: initialMemberData => ({
-                url: '/members',
-                method: 'POST',
-                body: {
-                    ...initialMemberData,
-                }
-            }),
-            invalidatesTags: [
-                { type: 'Member', id: "LIST" }
-            ]
-        }),
         updateMember: builder.mutation({
             query: initialMemberData => ({
                 url: '/members',
@@ -83,7 +71,6 @@ export const membersApiSlice = apiSlice.injectEndpoints({
 export const {
     useGetMembersQuery,
     useGetMemberByUsernameQuery,
-    useAddNewMemberMutation,
     useUpdateMemberMutation,
     useDeleteMemberMutation,
 } = membersApiSlice;

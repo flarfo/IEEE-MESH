@@ -34,6 +34,7 @@ app.use('/', require('./routes/root'));
 app.use('/', require('./routes/authRoutes'));
 app.use('/', require('./routes/userRoutes'));
 app.use('/', require('./routes/memberRoutes'));
+//app.use('/', require('./routes/hubRoutes'));
 
 // If reached, requested resource not found (or not implemented) - send Error 404
 app.all('*', (req, res) => {

@@ -7,7 +7,7 @@ import { Outlet } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 
 const Prefetch = () => {
-    const { username, roles } = useAuth();
+    const { username, role } = useAuth();
 
     useEffect(() => {
         console.log('subscribing');

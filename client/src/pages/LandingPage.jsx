@@ -1,160 +1,171 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+// src/pages/LandingPage.jsx
+import { Link } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import { useSendLogoutMutation } from '../features/auth/authApiSlice';
-import { Layout, Typography, Button, Space, Divider } from 'antd';
-import { DatabaseOutlined, UserAddOutlined, DashboardOutlined, LogoutOutlined, LoginOutlined, ProfileOutlined } from '@ant-design/icons';
+import { Layout, Typography, Space, Divider, Row, Col } from 'antd';
+import {
+  DatabaseOutlined,
+  UserAddOutlined,
+  DashboardOutlined,
+  LogoutOutlined,
+  LoginOutlined,
+  ProfileOutlined
+} from '@ant-design/icons';
+import AnimatedBackground from '../components/AnimatedBackground';
+
 const { Content, Footer } = Layout;
-const { Title, Paragraph } = Typography;
+const { Paragraph } = Typography;
 
 const LandingPage = () => {
-    const { status, username } = useAuth();
+  const { status, username } = useAuth();
 
-    const [sendLogout, {
-        isLoading,
-        isSuccess,
-        isError,
-        error
-    }] = useSendLogoutMutation();
+  const [sendLogout, {
+    isLoading,
+    isSuccess,
+    isError,
+    error
+  }] = useSendLogoutMutation();
 
-    if (isLoading) return <p>Logging Out...</p>;
-    if (isError) return <p>Error: {error.data?.message}</p>
+  if (isLoading) return (
+    <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="text-xl font-semibold text-gray-700">Logging Out...</div>
+    </div>
+  );
 
-    return (
-        <Layout className='min-h-screen'>
-            <Content className='px-4 sm:px-8 md:px-16'>
-                <div className='max-w-4xl mx-auto text-center py-16 md:py-24'>
-                    {/* Hero Section */}
-                    <Title level={1} style={{ fontSize: '3rem', marginBottom: '2rem' }}>
-                        IEEE MESH
-                    </Title>
+  if (isError) return (
+    <div className="flex items-center justify-center h-screen bg-gray-50">
+      <div className="text-xl font-semibold text-red-600">Error: {error.data?.message}</div>
+    </div>
+  );
 
-                    <Paragraph className='text-lg md:text-xl mb-12' style={{ maxWidth: '800px', margin: '0 auto 3rem' }}>
-                        An effort to increase new student retention and maintain alumni connections
-                        by creating accessible, centralized profiles of academic and professional involvements.
-                    </Paragraph>
+  // Define cards based on user status
+  const getCards = () => {
+    const cards = [];
 
-                    <Space direction='vertical' size='large' className='w-full'>
-                        {status !== '' && <Link to='/database/members'>
-                            <Button
-                                type='primary'
-                                size='large'
-                                icon={<DatabaseOutlined />}
-                                style={{
-                                    height: 'auto',
-                                    padding: '1.2rem 2.5rem',
-                                    fontSize: '1.2rem',
-                                    width: '280px',
-                                    backgroundColor: 'black'
-                                }}
-                            >
-                                View Database
-                            </Button>
-                        </Link>}
+    if (status !== '') {
+      cards.push({
+        title: 'Database',
+        icon: <DatabaseOutlined className="text-4xl mb-4 text-white" />,
+        description: 'Access the member database',
+        link: '/database/members',
+      });
 
-                        {status !== '' && <Link to={`/profile/${username}`}>
-                            <Button
-                                type='primary'
-                                size='large'
-                                icon={<ProfileOutlined />}
-                                style={{
-                                    height: 'auto',
-                                    padding: '1.2rem 2.5rem',
-                                    fontSize: '1.2rem',
-                                    width: '280px',
-                                    backgroundColor: 'black'
-                                }}
-                            >
-                                View Profile
-                            </Button>
-                        </Link>}
+      cards.push({
+        title: 'Profile',
+        icon: <ProfileOutlined className="text-4xl mb-4 text-white" />,
+        description: `View your profile details`,
+        link: `/profile/${username}`,
+      });
+    }
 
-                        {status === 'Admin' && <Link to='/dash'>
-                            <Button
-                                type='primary'
-                                size='large'
-                                icon={<DashboardOutlined />}
-                                style={{
-                                    height: 'auto',
-                                    padding: '1.2rem 2.5rem',
-                                    fontSize: '1.2rem',
-                                    width: '280px',
-                                    backgroundColor: 'black'
-                                }}
-                            >
-                                Admin Dashboard
-                            </Button>
-                        </Link>}
+    if (status === 'Admin') {
+      cards.push({
+        title: 'Admin Dashboard',
+        icon: <DashboardOutlined className="text-4xl mb-4 text-white" />,
+        description: 'Manage system settings and users',
+        link: '/dash',
+      });
+    }
 
-                        {status === '' && <Link to='/register'>
-                            <Button
-                                type='primary'
-                                size='large'
-                                icon={<UserAddOutlined />}
-                                style={{
-                                    height: 'auto',
-                                    padding: '1.2rem 2.5rem',
-                                    fontSize: '1.2rem',
-                                    width: '280px',
-                                    backgroundColor: 'black'
-                                }}
-                            >
-                                Register
-                            </Button>
-                        </Link>}
+    if (status === '') {
+      cards.push({
+        title: 'Register',
+        icon: <UserAddOutlined className="text-4xl mb-4 text-white" />,
+        description: 'Create a new account',
+        link: '/register',
+      });
 
-                        {status === '' && <Link to='/login'>
-                            <Button
-                                type='primary'
-                                size='large'
-                                icon={<LoginOutlined />}
-                                style={{
-                                    height: 'auto',
-                                    padding: '1.2rem 2.5rem',
-                                    fontSize: '1.2rem',
-                                    width: '280px',
-                                    backgroundColor: 'black'
-                                }}
-                            >
-                                Login
-                            </Button>
-                        </Link>}
+      cards.push({
+        title: 'Login',
+        icon: <LoginOutlined className="text-4xl mb-4 text-white" />,
+        description: 'Access your account',
+        link: '/login',
+      });
+    }
 
-                        {status !== '' && <Button
-                            type='primary'
-                            size='large'
-                            icon={<LogoutOutlined />}
-                            style={{
-                                height: 'auto',
-                                padding: '1.2rem 2.5rem',
-                                fontSize: '1.2rem',
-                                width: '280px',
-                                backgroundColor: 'black'
-                            }}
-                            onClick={sendLogout}
-                        >
-                            Logout
-                        </Button>}
-                    </Space>
-                </div>
-            </Content>
+    if (status !== '') {
+      cards.push({
+        title: 'Logout',
+        icon: <LogoutOutlined className="text-4xl mb-4 text-white" />,
+        description: 'Sign out from your account',
+        onClick: sendLogout,
+      });
+    }
 
-            <Footer style={{ background: '#f5f5f5' }}>
-                <div className='max-w-4xl mx-auto'>
-                    <div className='flex flex-col md:flex-row justify-between items-center'>
-                        <div className='mb-4 md:mb-0'>
-                            <span>©2025 IEEE MESH - All rights reserved.</span>
-                        </div>
-                        <Space split={<Divider type='vertical' style={{ borderColor: 'black' }} />}>
-                            <Link to='#' className='hover:text-blue-600'>About us</Link>
-                            <Link to='#' className='hover:text-blue-600'>Privacy</Link>
-                            <Link to='#' className='hover:text-blue-600'>Contact</Link>
-                        </Space>
+    return cards;
+  };
+
+  return (
+    <Layout className="bg-transparent">
+      <AnimatedBackground />
+      <Content className='pt-8 px-4 sm:px-8 bg-transparent'>
+        <div className='max-w-5xl mx-auto flex flex-col items-center justify-center'>
+          <img
+            src='/images/MESH.svg'
+            alt='MESH Logo'
+            className='w-64 md:w-80'
+          />
+        </div>
+      </Content>
+
+      <Content className='px-4 sm:px-8 md:px-16 py-8 bg-transparent'>
+        <div className='max-w-5xl mx-auto'>
+          <Row gutter={[16, 16]} justify="center">
+            {getCards().map((card, index) => (
+              <Col xs={24} sm={12} md={8} key={index}>
+                {card.onClick ? (
+                  <div
+                    onClick={card.onClick}
+                    className={`rounded-lg p-6 text-center h-full cursor-pointer
+                      transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1
+                      flex flex-col items-center justify-center border border-gray-500 
+                      shadow-lg backdrop-filter backdrop-blur-sm bg-black bg-opacity-50`}
+                  >
+                    {card.icon}
+                    <Paragraph className="text-white m-0">{card.description}</Paragraph>
+                  </div>
+                ) : (
+                  <Link to={card.link}>
+                    <div
+                      className={`rounded-lg p-6 text-center h-full
+                        transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1
+                        flex flex-col items-center justify-center border border-gray-500 
+                        shadow-lg backdrop-filter backdrop-blur-sm bg-black bg-opacity-50`}
+                    >
+                      {card.icon}
+                      <Paragraph className="text-white m-0">{card.description}</Paragraph>
                     </div>
-                </div>
-            </Footer>
-        </Layout>
-    );
+                  </Link>
+                )}
+              </Col>
+            ))}
+          </Row>
+        </div>
+      </Content>
+
+      <Footer className="text-white py-6 bg-transparent mt-auto">
+        <div className='max-w-5xl mx-auto'>
+          <div className='flex flex-col md:flex-row justify-between items-center'>
+            <div className='mb-2 md:mb-0'>
+              <img
+                src='/images/MESH.svg'
+                alt='MESH Logo'
+                className='h-6 mb-2'
+              />
+              <span className="text-gray-400 text-sm">©2025 IEEE MESH - All rights reserved.</span>
+            </div>
+            <div>
+              <Space split={<Divider type='vertical' style={{ borderColor: '#666' }} />}>
+                <Link to='#' className='text-gray-400 hover:text-white transition-colors'>About us</Link>
+                <Link to='#' className='text-gray-400 hover:text-white transition-colors'>Privacy</Link>
+                <Link to='#' className='text-gray-400 hover:text-white transition-colors'>Contact</Link>
+              </Space>
+            </div>
+          </div>
+        </div>
+      </Footer>
+    </Layout>
+  );
 };
 
 export default LandingPage;

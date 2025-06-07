@@ -14,10 +14,11 @@ const Welcome = () => {
 
             <h1>Welcome!</h1>
 
-            <p><Link to='/dash/members'>View Database</Link></p>
+            <p><Link to='/database/members'>View Database</Link></p>
 
-            {(isManager || isAdmin) && <p><Link to='/dash/users'>View Users</Link></p>}
-            {(isManager || isAdmin) && <p><Link to='/dash/users/new'>Add New User</Link></p>}
+            {(isAdmin) && <p><Link to='/dash/users'>View Users</Link></p>}
+            {(isAdmin) && <p><Link to='/dash/users/new'>Add New User</Link></p>}
+            {(isAdmin) && <p><Link to='/dash/hubs'>View School Hubs</Link></p>}
 
         </section>
     );

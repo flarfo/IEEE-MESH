@@ -44,12 +44,12 @@ const User = ({ userId }) => {
 
                         <div className="mb-4">
                             <Space size={[0, 8]} wrap>
-                                {user.roles.map((role, index) => (
+                                {Object.keys(user.roles).map((hubId, index) => (
                                     <Tag
                                         key={index}
-                                        color={roleColors[role] || 'default'}
+                                        color={roleColors[hubId] || 'default'}
                                     >
-                                        {role}
+                                        {hubId}: {user.roles[hubId]}
                                     </Tag>
                                 ))}
                             </Space>

@@ -2,10 +2,14 @@ import React from 'react';
 import { useGetUsersQuery } from './usersApiSlice';
 import User from './User';
 import { Typography, Spin, Alert, Space } from 'antd';
+import useAuth from '../../hooks/useAuth';
 
 const { Title } = Typography;
 
 const UsersList = () => {
+    const { hubId } = useAuth();
+
+    // ADMIN PAGE
     const {
         data: users,
         isLoading,

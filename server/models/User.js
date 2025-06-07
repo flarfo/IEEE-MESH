@@ -16,15 +16,16 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    roles: [{
+    site_role: {
         type: String,
+        required: true,
         default: 'Guest'
-    }],
+    },
     member: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Member'
     },
-    verified: {
+    email_verified: {
         type: Boolean,
         default: false
     },

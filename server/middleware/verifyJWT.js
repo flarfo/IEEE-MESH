@@ -14,9 +14,9 @@ const verifyJWT = (req, res, next) => {
         process.env.ACCESS_TOKEN_SECRET,
         (err, decoded) => {
             if (err) return res.status(403).json({ message: 'Forbidden' });
-            
             req.username = decoded.UserInfo.username;
-            req.roles = decoded.UserInfo.roles;
+            req.site_role = decoded.UserInfo.role;
+
             next();
         }
     );

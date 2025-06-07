@@ -1,10 +1,15 @@
 const User = require('../models/User');
 const Member = require('../models/Member');
+const Hub = require('../models/Hub');
 const Token = require('../models/Token');
 const crypto = require('crypto');
-const sendEmail = require('../config/sendEmail');
+const { sendVerificationEmail } = require('../config/sendEmail');
 
 // TODO: add user linking and member creation
+
+const debugTestEmail = async (req, res) => {
+    sendVerificationEmail({ email: 'noahwhelden@gmail.com', url: 'http://localhost:3000/'})
+};
 
 // @desc Get all users
 // @route GET /users
@@ -40,22 +45,20 @@ const getMemberByUsername = async (req, res) => {
         return res.status(400).json({ message: `User ${username} not found.` });
     }
 
-    if (user.username === req.username || req.roles.includes('Admin')) {
-        if (user.member) {
-            const member = await Member.findOne({ '_id': user.member });
+    if (user.member) {
+        const member = await Member.findOne({ '_id': user.member });
 
-            if (!member) {
-                const memberObject = { email: user.email, username: user.username };
-                const newMember = await Member.create(memberObject);
-                user.member = newMember._id;
-                await user.save();
+        if (!member) {
+            const memberObject = { email: user.email, username: user.username };
+            const newMember = await Member.create(memberObject);
+            user.member = newMember._id;
+            await user.save();
 
-                return res.json(newMember);
-            }
-
-            // return found member
-            return res.json(member);
+            return res.json(newMember);
         }
+
+        // return found member
+        return res.json(member);
     }
 
     return res.status(401).json({ message: 'Unauthorized.' });
@@ -75,21 +78,38 @@ const createNewUser = async (req, res) => {
 
     // Check for duplicate user information
     // TODO: might need to modify this $or query
-    const duplicateUser = await User.findOne({ $or: [{ username }, { email }] }).lean().exec();
+    const duplicateUsername = await User.findOne({ username }).lean().exec();
+    const duplicateEmail = await User.findOne({ email }).lean().exec();
 
-    if (duplicateUser) {
+    if (duplicateUsername || duplicateEmail) {
         // if duplicate, return JSON with conflict message
-        return res.status(409).json({ message: 'Duplicate email or username.' });
+        return res.status(409).json(
+            {
+                message: 'Duplicate email or username.',
+                duplicateUsername: (duplicateUsername != null),
+                duplicateEmail: (duplicateEmail != null)
+            }
+        );
+    }
+
+    const emailIdentifier = email.split('@').pop();
+    const hub = await Hub.findOne({ emailIdentifier }).lean().exec();
+
+    if (!hub) {
+        return res.status(404).json({ message: `MESH Hub for ${emailIdentifier} does not exist.` });
     }
 
     // TODO: create member on user creation
     let userObject;
-    if (req.roles?.includes('Admin')) {
-        // TODO: i don't think this works
+    const userRoles = new Map();
+    userRoles.set(hub._id, ['Guest']);
+
+    if (roles?.includes('Admin')) {
+        // TODO: i don't think this works, needs to be roles: {}
         userObject = { email, username, password, roles };
     }
     else {
-        userObject = { email, username, password, roles: ['Guest'] };
+        userObject = { email, username, password, roles: userRoles };
     }
 
     // Create and store the new user
@@ -103,7 +123,7 @@ const createNewUser = async (req, res) => {
     }
 
     // Check for duplicate member information
-    const memberObject = { email: email, name: username, username: username };
+    const memberObject = { email: email, name: username, username: username, hub: hub._id };
     const member = await Member.create(memberObject);
 
     if (!member) {
@@ -128,77 +148,8 @@ const createNewUser = async (req, res) => {
         return res.status(400);
     }
     console.log('Sending email...');
-    const url = `${process.env.CLIENT_URL}/users/${user._id}/verify/${token.token}`
-    await sendEmail({
-        email: user.email,
-        subject: 'Verify Your Email',
-        text: `Click the link to verify your email address.`,
-        html: `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <title>Verify Email</title>
-            </head>
-            <body style="margin: 0; padding: 0; background-color: #f4f4f4;">
-                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding: 40px 0;">
-                    <tr>
-                    <td align="center">
-                        <table width="600" cellpadding="0" cellspacing="0" border="0" style="background: #ffffff; border-radius: 6px; box-shadow: 0 0 6px rgba(0,0,0,0.1); font-family: Arial, sans-serif; padding: 40px;">
-                        <tr>
-                            <td align="center" style="padding-bottom: 20px; font-weight:900; font-size:32px">
-                                IEEE MESH
-                            </td>
-                        </tr>
-                        <tr>
-                            <td align="center" style="font-size: 16px; color: gray;">
-                            Please confirm that you want to use this as your account email address. Once verified, you can setup your profile and start connecting!
-                            </td>
-                        </tr>
-                       <tr>
-                            <td align="center" style="padding: 20px 0;">
-                                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width: 600px;">
-                                <tr>
-                                    <td align="center">
-                                    <a href="${url}"
-                                        style="display: inline-block; background-color: #000000; color: #ffffff; padding: 14px 0; width: 100%; font-size: 16px; font-weight: bold; text-align: center; text-decoration: none; border-radius: 6px; font-family: Arial, sans-serif;">
-                                        Verify my email
-                                    </a>
-                                    </td>
-                                </tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td align="center" style="font-size: 14px; color: #888;">
-                            Or paste this link into your browser:<br>
-                            <b>
-                                <a href="{url}"
-                                    style="color: #66B3F9; word-break: break-all; text-decoration:none">
-                                    ${url}
-                                </a>
-                            </b>
-                            </td>
-                        </tr>
-                        </table>
-                    </td>
-                    </tr>
-                    <tr>
-                        <td align="center" style="font-size: 12px; color: gray; padding-top: 20px; font-family: Arial, sans-serif">
-                            &copy; 2025 IEEE MESH. All rights reserved.<br>
-                           Gainesville, FL 32612
-                            </td>
-                        </tr>
-                        <tr>
-                            <td align="center" style="padding-top: 10px;">
-                            <img src="https://iconduck.com/api/v2/vectors/vctr640ufs5o/media/png/256/download" alt="Footer Icon" width="48">
-                            </td>
-                        </tr>
-                </table>
-            </body>
-            </html>
-        `
-    });
+    const url = `http://${process.env.CLIENT_URL}/users/${user._id}/verify/${token.token}`
+    await sendVerificationEmail({ email: user.email, url})
 };
 
 // @desc Verify account email
@@ -246,28 +197,24 @@ const updateUser = async (req, res) => {
         return res.status(400).json({ message: 'User not found.' });
     }
     // Ensure requesting user is authorized to update
-    if (user.username === req.username || req.roles.includes('Admin')) {
-        user.email = email;
-        user.username = username;
+    user.email = email;
+    user.username = username;
 
-        if (password) {
-            user.password = password;
-        }
-
-        // Only administrators should be able to update user roles
-        if (req.roles.includes('Admin')) {
-            if (roles) {
-                user.roles = roles;
-                console.log('roles updated', user.roles);
-            }
-        }
-
-        const updatedUser = await user.save();
-
-        return res.json({ message: `${updatedUser.username} updated.` });
+    if (password) {
+        user.password = password;
     }
 
-    return res.status(401).json({ message: 'Unauthorized.' });
+    // Only administrators should be able to update user roles
+    if (req.roles.includes('Admin')) {
+        if (roles) {
+            user.roles = roles;
+            console.log('roles updated', user.roles);
+        }
+    }
+
+    const updatedUser = await user.save();
+
+    return res.json({ message: `${updatedUser.username} updated.` });
 };
 
 // @desc Delete a user
@@ -293,6 +240,7 @@ const deleteUser = async (req, res) => {
 };
 
 module.exports = {
+    debugTestEmail,
     getAllUsers,
     createNewUser,
     getUserVerificationById,

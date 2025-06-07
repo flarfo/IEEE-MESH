@@ -13,6 +13,9 @@ router.route('/hubs')
 router.route('/hubs/:id')
     .get(hubController.getHubById);
 
+router.route('/hubs/:id/profiles')
+    .get(auth.verifyHubAdmin, hubController.getProfilesByHubId);
+
 router.route('/hubs/byName/:name')
     .get(hubController.getHubByName);
 

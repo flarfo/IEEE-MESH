@@ -1,37 +1,47 @@
-import { faUpRightAndDownLeftFromCenter } from '@fortawesome/free-solid-svg-icons';
-import { store } from '../../app/store'
-import { membersApiSlice } from '../members/membersApiSlice'
+import { store } from '../../app/store';
 import { usersApiSlice } from '../users/usersApiSlice';
+import { hubsApiSlice } from '../hubs/hubsApiSlice';
 import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import useAuth from '../../hooks/useAuth';
 
 const Prefetch = () => {
-    const { username, role } = useAuth();
-
+    const { isAuthenticated, username, uid, role } = useAuth();
+    
     useEffect(() => {
-        console.log('subscribing');
-        // create manual subscriptions to our data to maintain state after getting data,
-        // this will prevent our data from expiring and our state changing (to whatever state exists for null data)
-        const members = store.dispatch(membersApiSlice.endpoints.getMembers.initiate());
-
-        let users;
-        if (roles.includes('Admin')) {
-            users = store.dispatch(usersApiSlice.endpoints.getUsers.initiate());
-        }
+        console.log('Initializing data subscriptions');
         
-        return () => {
-            console.log('unsubscribing');
-            // unsubscribe on page exit
-            members.unsubscribe();
-
-            if (roles.includes('Admin') && users) {
-                users.unsubscribe();
+        // Track subscriptions to unsubscribe later
+        const subscriptions = [];
+        
+        if (isAuthenticated) {
+            // Always fetch current user data for authenticated users
+            const currentUser = store.dispatch(usersApiSlice.endpoints.getCurrentUser.initiate(uid));
+            subscriptions.push(currentUser);
+            
+            // Always fetch user's hubs for authenticated users
+            const userHubs = store.dispatch(hubsApiSlice.endpoints.getUserHubs.initiate());
+            subscriptions.push(userHubs);
+            
+            // Admin-specific prefetches
+            if (role === 'Admin') {
+                const users = store.dispatch(usersApiSlice.endpoints.getUsers.initiate());
+                subscriptions.push(users);
+                
+                // If you have admin-specific hub operations
+                const allHubs = store.dispatch(hubsApiSlice.endpoints.getAllHubs.initiate());
+                subscriptions.push(allHubs);
             }
         }
-    }, [])
-
-    return <Outlet />
+        
+        // Cleanup function to unsubscribe from all initiated subscriptions
+        return () => {
+            console.log('Cleaning up data subscriptions');
+            subscriptions.forEach(subscription => subscription.unsubscribe());
+        };
+    }, [isAuthenticated, username]);
+    
+    return <Outlet />;
 };
 
 export default Prefetch;

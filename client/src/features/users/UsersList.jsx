@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGetUsersQuery } from './usersApiSlice';
+import { useGetAllUsersQuery } from './usersApiSlice';
 import User from './User';
 import { Typography, Spin, Alert, Space } from 'antd';
 import useAuth from '../../hooks/useAuth';
@@ -16,7 +16,7 @@ const UsersList = () => {
         isSuccess,
         isError,
         error
-    } = useGetUsersQuery('usersList', {
+    } = useGetAllUsersQuery('usersList', {
         pollingInterval: 60000,
         refetchOnFocus: true,
         refetchOnMountOrArgChange: true

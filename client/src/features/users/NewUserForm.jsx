@@ -1,6 +1,6 @@
 // NON-PUBLIC FACING USER CREATION, USED TO CREATE NEW ACCOUNTS DIRECTLY AS AN ADMIN
 import { useState, useEffect } from 'react';
-import { useAddNewUserMutation } from './usersApiSlice';
+import { useRegisterUserMutation } from './usersApiSlice';
 import { useNavigate } from 'react-router-dom'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave } from '@fortawesome/free-solid-svg-icons';
@@ -15,7 +15,7 @@ const NewUserForm = () => {
         isSuccess,
         isError,
         error
-    }] = useAddNewUserMutation();
+    }] = useRegisterUserMutation();
 
     const navigate = useNavigate();
 

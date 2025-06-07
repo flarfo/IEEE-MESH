@@ -1,19 +1,20 @@
 const Hub = require('../models/Hub');
+const Profile = require('../models/Profile');
 
 // @desc Get all hubs
 // @route GET /hubs
 // @access Private
-const getHubs = async (req, res) => {
+const getAllHubs = async (req, res) => {
     const hubs = await Hub.find().lean();
-    
-        if (!hubs?.length) {
-            // if no hubs exist, return JSON with bad request message
-            return res.status(400).json({ message: 'No hubs found.' });
-        }
-        // TODO: don't include unnecessary info (like page customizations)
-    
-        // return found members
-        res.json(hubs);
+
+    if (!hubs?.length) {
+        // if no hubs exist, return JSON with bad request message
+        return res.status(400).json({ message: 'No hubs found.' });
+    }
+    // TODO: don't include unnecessary info (like page customizations)
+
+    // return found members
+    res.json(hubs);
 };
 
 // @desc Get hub by name
@@ -50,7 +51,7 @@ const getHubById = async (req, res) => {
 // @route POST /hubs
 // @access Private (MESH Admin)
 const createNewHub = async (req, res) => {
-    
+
 };
 
 // @desc Updates an existing hub
@@ -67,13 +68,27 @@ const deleteHub = async (req, res) => {
 
 };
 
-// @desc Gets member profiles of a specific hub
-// @route GET /hubs/:id/members
+// @desc Gets profiles of a specific hub
+// @route GET /hubs/:id/profiles
 // @access Public
-const getMembersByHubId = async (req, res) => {
-    // Change functionality based on access level 
+const getProfilesByHubId = async (req, res) => {
+    // TODO: Change functionality based on access level 
     // - base members can view public profiles
     // - elevated members (webmaster, recruiter) can view all
+    const hubId = req.params.id;
+    const hub = Hub.findById(hubId);
+
+    const users = Object.keys(hub.users);
+
+    const profiles = Profile.aggregate([
+        {
+            $match: {
+                user: { $in: users }
+            }
+        }
+    ])
+
+    return res.json(profiles);
 };
 
 // @desc Gets membership requests of a specific hub
@@ -126,8 +141,8 @@ const addNewRecruiter = async (req, res) => {
 };
 
 module.exports = {
-    getHubs,
+    getAllHubs,
     getHubByName,
     getHubById,
-
+    getProfilesByHubId,
 };

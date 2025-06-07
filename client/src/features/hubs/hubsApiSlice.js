@@ -41,6 +41,28 @@ export const hubsApiSlice = apiSlice.injectEndpoints({
             },
             providesTags: (result, error, arg) => [{ type: 'Hub', id: arg }]
         }),
+        getUserHubs: builder.query({
+            query: () => '/hubs/me',
+            validateStatus: (response, result) => {
+                return response.status === 200 && !result.isError;
+            },
+            transformResponse: responseData => {
+                const loadedHubs = responseData.map(hub => {
+                    hub.id = hub._id;
+                    return hub;
+                });
+                return hubsAdapter.setAll(initialState, loadedHubs);
+            },
+            providesTags: (result, error, arg) => {
+                if (result?.ids) {
+                    return [
+                        { type: 'UserHubs', id: 'LIST' },
+                        ...result.ids.map(id => ({ type: 'Hub', id }))
+                    ];
+                }
+                else return [{ type: 'UserHubs', id: 'LIST' }];
+            }
+        }),
         getHubById: builder.query({
             query: (id) => `/hubs/${id}`,
             validateStatus: (response, result) => {
@@ -99,7 +121,7 @@ export const hubsApiSlice = apiSlice.injectEndpoints({
                 });
                 return loadedMembers;
             },
-            providesTags: (result) => {   
+            providesTags: (result) => {
                 return [{ type: 'Member', id: 'LIST' }, ...result.map(member => ({ type: 'Member', id: member.id }))]
             }
         }),
@@ -116,14 +138,34 @@ export const hubsApiSlice = apiSlice.injectEndpoints({
                 return loadedRequests;
             }
         }),
-        verifyUserById: builder.mutation({
-            query: ({ hubId, userId }) => ({
-                url: `/hubs/${hubId}/members`,
-                method: 'POST',
-                body: { userId }
+        createMembershipRequest: builder.mutation({
+            query: (hubId) => ({
+                url: `/hubs/${hubId}/requests`,
+                method: 'POST'
             }),
             invalidatesTags: (result, error, arg) => [
-                { type: 'User', id: arg.userId }
+                { type: 'UserHubs', id: 'LIST' }
+            ]
+        }),
+
+        acceptMembershipRequest: builder.mutation({
+            query: ({ hubId, requestId }) => ({
+                url: `/hubs/${hubId}/requests/${requestId}/accept`,
+                method: 'POST'
+            }),
+            invalidatesTags: (result, error, arg) => [
+                { type: 'Hub', id: arg.hubId },
+                { type: 'UserHubs', id: 'LIST' }
+            ]
+        }),
+
+        rejectMembershipRequest: builder.mutation({
+            query: ({ hubId, requestId }) => ({
+                url: `/hubs/${hubId}/requests/${requestId}/reject`,
+                method: 'POST'
+            }),
+            invalidatesTags: (result, error, arg) => [
+                { type: 'Hub', id: arg.hubId }
             ]
         }),
         updateUserRolesById: builder.mutation({
@@ -160,7 +202,7 @@ export const hubsApiSlice = apiSlice.injectEndpoints({
                 });
                 return loadedEvents;
             },
-            providesTags: (result) => {   
+            providesTags: (result) => {
                 return [{ type: 'Event', id: 'LIST' }, ...result.map(event => ({ type: 'Event', id: event.id }))]
             }
         }),
@@ -176,7 +218,7 @@ export const hubsApiSlice = apiSlice.injectEndpoints({
                 });
                 return loadedAnnouncements;
             },
-            providesTags: (result) => {   
+            providesTags: (result) => {
                 return [{ type: 'Announcement', id: 'LIST' }, ...result.map(announcement => ({ type: 'Announcement', id: announcement.id }))]
             }
         }),

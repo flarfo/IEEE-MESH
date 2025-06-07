@@ -4,25 +4,21 @@ const usersController = require('../controllers/usersController');
 const verifyJWT = require('../middleware/verifyJWT');
 const auth = require('../middleware/authMiddleware');
 
-router.route('/debug-test-email')
-    .get(usersController.debugTestEmail)
-
-router.route('/users')
-    .post(usersController.createNewUser);
+router.route('/users/register')
+    .post(usersController.registerUser);
 
 router.route('/users/:id/verify/:token')
     .get(usersController.getUserVerificationById);
 
 router.use('/users', verifyJWT);
 
-
 router.route('/users/:username')
     .get(usersController.getMemberByUsername);
 
 // Routing for Users data HTTP methods
 router.route('/users')
-    .get(auth.verifyAdmin, usersController.getAllUsers)
-    .patch(auth.verifyAdminOrOwner, usersController.updateUser)
-    .delete(auth.verifyAdminOrOwner, usersController.deleteUser);
+    .get(auth.verifySiteAdmin, usersController.getAllUsers)
+    .patch(auth.verifySiteAdminOrOwner, usersController.updateUser)
+    .delete(auth.verifySiteAdminOrOwner, usersController.deleteUser);
 
 module.exports = router;

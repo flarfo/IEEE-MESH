@@ -1,7 +1,6 @@
-// MEMBER DATA MODEL
 const mongoose = require('mongoose');
 
-const memberSchema  = new mongoose.Schema({
+const profileSchema  = new mongoose.Schema({
     name: {
         type: String,
         required: false
@@ -37,4 +36,4 @@ const memberSchema  = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Member', memberSchema);
+module.exports = mongoose.model('Profile', profileSchema);

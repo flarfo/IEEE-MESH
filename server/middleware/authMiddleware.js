@@ -1,20 +1,21 @@
 // middleware/authMiddleware.js
 const User = require('../models/User');
+const Hub = require('../models/Hub');
 
 // Check if user is an admin
-const isAdmin = (req) => {
+const isSiteAdmin = (req) => {
     console.log(req.site_role);
     return req.site_role && req.site_role == 'Admin';
 };
 
-// Check if user is the content owner by comparing username
-const isOwner = (req, resourceOwnerUsername) => {
-    return req.username && req.username === resourceOwnerUsername;
+// Check if user is the content owner by comparing id
+const isOwner = (req, resourceOwnerId) => {
+    return req.id && req.id === resourceOwnerId;
 };
 
-const verifyAdmin = (req, res, next) => {
+const verifySiteAdmin = (req, res, next) => {
     try {
-        if (isAdmin(req)) {
+        if (isSiteAdmin(req)) {
             return next();
         }
 
@@ -37,7 +38,7 @@ const verifyOwner = async (req, res, next) => {
         }
 
         // Check if requester is the content owner
-        if (isOwner(req, targetUser.username)) {
+        if (isOwner(req, targetUser._id)) {
             return next();
         }
 
@@ -48,11 +49,32 @@ const verifyOwner = async (req, res, next) => {
     }
 };
 
+// Check if user has admin perms in specific hub
+const verifyHubAdmin = (req) => {
+    try {
+        const { id } = req.body.id;
+    
+        const hub = Hub.findById(id);
+        if (!hub) {
+            return res.status(404).json({ message: 'Hub not found.' });
+        }
+    
+        if (hub.users[req.uid].roles.includes('Admin')) {
+            return next();
+        }
+
+        return res.status(403).json({ message: 'Unauthorized. Only hub admins can access.' });
+    }
+    catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
 // Middleware for verifying if user is admin or content owner
-const verifyAdminOrOwner = async (req, res, next) => {
+const verifySiteAdminOrOwner = async (req, res, next) => {
     try {
         // If user is admin, proceed
-        if (isAdmin(req)) {
+        if (isSiteAdmin(req)) {
             return next();
         }
 
@@ -79,7 +101,8 @@ const verifyAdminOrOwner = async (req, res, next) => {
 };
 
 module.exports = {
-    verifyAdminOrOwner,
-    verifyAdmin,
-    verifyOwner
+    verifySiteAdminOrOwner,
+    verifySiteAdmin,
+    verifyOwner,
+    verifyHubAdmin
 };

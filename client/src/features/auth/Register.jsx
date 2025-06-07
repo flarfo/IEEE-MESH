@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { useAddNewUserMutation } from '../users/usersApiSlice';
+import { useRegisterUserMutation } from '../users/usersApiSlice';
 import { setCredentials } from '../auth/authSlice'; // Import the authentication action
 import { useLoginMutation } from '../auth/authApiSlice'; // Import the login mutation
 import { 
@@ -44,7 +44,7 @@ const Register = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const [register, { isLoading: isRegistering }] = useAddNewUserMutation();
+    const [register, { isLoading: isRegistering }] = useRegisterUserMutation();
     const [login, { isLoading: isLoggingIn }] = useLoginMutation(); // Add login mutation hook
 
     // clear error message field on form values change

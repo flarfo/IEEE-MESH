@@ -6,14 +6,14 @@ import Login from './features/auth/Login';
 import DashLayout from './components/DashLayout';
 import Welcome from './pages/Welcome';
 import UsersList from './features/users/UsersList';
-import MembersList from './features/members/MembersList';
+import ProfilesList from './features/profiles/ProfilesList';
 import EditUser from './features/users/EditUser';
 import NewUserForm from './features/users/NewUserForm';
 import Prefetch from './features/auth/Prefetch';
 import PersistLogin from './features/auth/PersistLogin';
 import RequireAuth from './features/auth/RequireAuth';
 import VerifyEmail from './features/users/VerifyEmail';
-import Profile from './features/members/Profile';
+import Profile from './features/profiles/Profile';
 import { ROLES } from './config/roles';
 
 function App() {
@@ -40,10 +40,10 @@ function App() {
                 <Route path=":username" element={<Profile />}>
                 </Route>
               </Route>
-              <Route element={<RequireAuth allowedRoles={[ROLES.Member, ROLES.Manager, ROLES.Admin]} />}>
+              <Route element={<RequireAuth allowedRoles={[ROLES.Profile, ROLES.Manager, ROLES.Admin]} />}>
                 <Route path="database">
-                  <Route path="members">
-                  <Route index element={<MembersList />} />
+                  <Route path="profiles">
+                  <Route index element={<ProfilesList />} />
                   </Route>
                 </Route>
               </Route>

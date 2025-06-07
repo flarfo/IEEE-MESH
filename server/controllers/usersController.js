@@ -1,15 +1,11 @@
 const User = require('../models/User');
-const Member = require('../models/Member');
+const Profile = require('../models/Profile');
 const Hub = require('../models/Hub');
 const Token = require('../models/Token');
 const crypto = require('crypto');
 const { sendVerificationEmail } = require('../config/sendEmail');
 
-// TODO: add user linking and member creation
-
-const debugTestEmail = async (req, res) => {
-    sendVerificationEmail({ email: 'noahwhelden@gmail.com', url: 'http://localhost:3000/'})
-};
+// TODO: add user linking and profile creation
 
 // @desc Get all users
 // @route GET /users
@@ -20,7 +16,7 @@ const getAllUsers = async (req, res) => {
     const users = await User.find().select('-password').lean();
 
     if (!users?.length) {
-        // if no members exist, return JSON with bad request message
+        // if no profiles exist, return JSON with bad request message
         return res.status(400).json({ message: 'No users found.' });
     }
 
@@ -31,7 +27,7 @@ const getAllUsers = async (req, res) => {
 // @desc Get user by username
 // @route GET /users/:username
 // @access Private
-const getMemberByUsername = async (req, res) => {
+const getProfileByUsername = async (req, res) => {
     const username = req.params.username;
 
     if (!username) {
@@ -41,33 +37,29 @@ const getMemberByUsername = async (req, res) => {
     const user = await User.findOne({ 'username': username }).select('-password');
 
     if (!user) {
-        // if no members exist, return JSON with bad request message
+        // if no profiles exist, return JSON with bad request message
         return res.status(400).json({ message: `User ${username} not found.` });
     }
 
-    if (user.member) {
-        const member = await Member.findOne({ '_id': user.member });
+    const profile = await Profile.findOne({ 'user': user._id });
 
-        if (!member) {
-            const memberObject = { email: user.email, username: user.username };
-            const newMember = await Member.create(memberObject);
-            user.member = newMember._id;
-            await user.save();
+    if (!profile) {
+        const profileObject = { email: user.email, username: user.username };
+        const newProfile = await Profile.create(profileObject);
+        user.profile = newProfile._id;
+        await user.save();
 
-            return res.json(newMember);
-        }
-
-        // return found member
-        return res.json(member);
+        return res.json(newProfile);
     }
 
-    return res.status(401).json({ message: 'Unauthorized.' });
+    // return found profile
+    return res.json(profile);
 };
 
-// @desc Create new user
-// @route POST /users
+// @desc Register a new user
+// @route POST /users/register
 // @access Public
-const createNewUser = async (req, res) => {
+const registerUser = async (req, res) => {
     const { email, username, password, roles } = req.body;
 
     // Confirm that data is valid
@@ -99,7 +91,7 @@ const createNewUser = async (req, res) => {
         return res.status(404).json({ message: `MESH Hub for ${emailIdentifier} does not exist.` });
     }
 
-    // TODO: create member on user creation
+    // TODO: create profile on user creation
     let userObject;
     const userRoles = new Map();
     userRoles.set(hub._id, ['Guest']);
@@ -122,17 +114,13 @@ const createNewUser = async (req, res) => {
         return res.status(400).json({ message: 'Invalid user data received.' });
     }
 
-    // Check for duplicate member information
-    const memberObject = { email: email, name: username, username: username, hub: hub._id };
-    const member = await Member.create(memberObject);
+    // Create new profile and link to User
+    const profileObject = { email: email, name: username, username: username, user: user._id };
+    const profile = await Profile.create(profileObject);
 
-    if (!member) {
-        return res.status(400).json({ message: 'Failed to create member object.' });
+    if (!profile) {
+        return res.status(400).json({ message: 'Failed to create profile object.' });
     }
-
-    // Create new member and link to User
-    user.member = member._id;
-    await user.save();
 
     const tokenObject = {
         userId: user._id,
@@ -149,7 +137,7 @@ const createNewUser = async (req, res) => {
     }
     console.log('Sending email...');
     const url = `http://${process.env.CLIENT_URL}/users/${user._id}/verify/${token.token}`
-    await sendVerificationEmail({ email: user.email, url})
+    await sendVerificationEmail({ email: user.email, url })
 };
 
 // @desc Verify account email
@@ -166,7 +154,7 @@ const getUserVerificationById = async (req, res) => {
         token: req.params.token
     });
 
-    // TODO: if member exists with given email already, link user to member
+    // TODO: if profile exists with given email already, link user to profile
 
     if (!token) {
         return res.status(400).json({ message: 'Verification token not found.' });
@@ -183,7 +171,7 @@ const getUserVerificationById = async (req, res) => {
 // @route PATCH /users
 // @access Private
 const updateUser = async (req, res) => {
-    const { id, email, username, password, roles } = req.body;
+    const { id, email, username, password } = req.body;
 
     // All fields (except password and roles) are required
     if (!id || !email || !username) {
@@ -202,14 +190,6 @@ const updateUser = async (req, res) => {
 
     if (password) {
         user.password = password;
-    }
-
-    // Only administrators should be able to update user roles
-    if (req.roles.includes('Admin')) {
-        if (roles) {
-            user.roles = roles;
-            console.log('roles updated', user.roles);
-        }
     }
 
     const updatedUser = await user.save();
@@ -233,18 +213,23 @@ const deleteUser = async (req, res) => {
         return res.status(400).json({ message: 'User not found.' });
     }
 
-    const result = await user.deleteOne();
+    // Delete user's profile
+    const profile = Profile.findOne({ user: user._id });
+    if (profile) {
+        await profile.deleteOne();
+    }
 
+    // Delete user
+    const result = await user.deleteOne();
     const reply = `User ${result.email} with ID ${result._id} deleted.`
     res.json(reply);
 };
 
 module.exports = {
-    debugTestEmail,
     getAllUsers,
-    createNewUser,
+    registerUser,
     getUserVerificationById,
-    getMemberByUsername,
+    getProfileByUsername,
     updateUser,
     deleteUser
 };
